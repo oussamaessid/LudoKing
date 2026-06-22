@@ -5020,7 +5020,7 @@
                 android:layout_height="wrap_content"
                 android:fontFamily="sans-serif-medium"
                 android:gravity="center"
-                android:text="Mode Pénalité"
+                android:text="Mode Game"
                 android:textColor="#FFFFFF"
                 android:textSize="18sp"
                 android:textStyle="bold" />
@@ -5057,21 +5057,11 @@
                     android:layout_height="wrap_content"
                     android:orientation="vertical">
 
-                    <TextView
+                    <ImageView
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="Pénalité d'Élimination"
-                        android:textColor="#FF7777"
-                        android:textSize="13sp"
-                        android:textStyle="bold" />
-
-                    <TextView
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="2dp"
-                        android:text="La pièce fautive est renvoyée chez elle immédiatement."
-                        android:textColor="#555566"
-                        android:textSize="11sp" />
+                        android:adjustViewBounds="true"
+                        android:src="@drawable/ic_elimination" />
 
                     <TextView
                         android:id="@+id/mode1selectedtag"
@@ -5112,21 +5102,11 @@
                     android:layout_height="wrap_content"
                     android:orientation="vertical">
 
-                    <TextView
+                    <ImageView
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="Tour Sauté"
-                        android:textColor="#77AAFF"
-                        android:textSize="13sp"
-                        android:textStyle="bold" />
-
-                    <TextView
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="2dp"
-                        android:text="Le joueur qui a raté l'élimination perd son prochain tour."
-                        android:textColor="#555566"
-                        android:textSize="11sp" />
+                        android:adjustViewBounds="true"
+                        android:src="@drawable/ic_toursaute" />
 
                     <TextView
                         android:id="@+id/mode2selectedtag"
@@ -5167,21 +5147,11 @@
                     android:layout_height="wrap_content"
                     android:orientation="vertical">
 
-                    <TextView
+                    <ImageView
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="Avertissement"
-                        android:textColor="#77DD77"
-                        android:textSize="13sp"
-                        android:textStyle="bold" />
-
-                    <TextView
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="2dp"
-                        android:text="Avertissement d'abord, puis le joueur survivant joue à sa place."
-                        android:textColor="#555566"
-                        android:textSize="11sp" />
+                        android:adjustViewBounds="true"
+                        android:src="@drawable/ic_avertissement" />
 
                     <TextView
                         android:id="@+id/mode3selectedtag"
