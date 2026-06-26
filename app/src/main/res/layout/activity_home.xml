@@ -4939,41 +4939,6 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintWidth_percent="0.75" />
 
-    <EditText
-        android:id="@+id/editTextText"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:background="#FFFFFF"
-        android:ems="10"
-        android:fontFamily="@font/rcnormal"
-        android:inputType="text"
-        android:maxLength="12"
-        android:paddingStart="5dp"
-        android:paddingTop="18dp"
-        android:paddingEnd="40dp"
-        android:paddingBottom="8dp"
-        android:text="Guest1234"
-        android:textColor="@color/black"
-        android:textSize="18sp"
-        android:visibility="gone"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent" />
-
-    <TextView
-        android:id="@+id/edittextokbtn"
-        android:layout_width="60dp"
-        android:layout_height="0dp"
-        android:fontFamily="@font/rcbold"
-        android:gravity="center_vertical"
-        android:paddingTop="10dp"
-        android:text="OK"
-        android:textAlignment="center"
-        android:textColor="@color/black"
-        app:layout_constraintBottom_toBottomOf="@+id/editTextText"
-        app:layout_constraintEnd_toEndOf="@+id/editTextText"
-        app:layout_constraintTop_toTopOf="@+id/editTextText" />
-
     <!-- Penalty Mode Selection Overlay -->
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/penaltymodelayout"

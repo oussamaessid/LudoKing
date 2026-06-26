@@ -10,6 +10,8 @@ import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.ObjectAnimator;
 import android.annotation.SuppressLint;
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.PorterDuff;
@@ -39,6 +41,9 @@ import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.resource.gif.GifDrawable;
 import com.bumptech.glide.request.target.DrawableImageViewTarget;
 import com.bumptech.glide.request.transition.Transition;
+
+import android.text.Editable;
+import android.text.TextWatcher;
 
 import java.util.Objects;
 
@@ -116,7 +121,7 @@ public class HomeActivity extends AppCompatActivity implements View.OnClickListe
     boolean comp2players = true;
     int computerselectedcolor=1;
 
-    EditText mainNamesEditText; TextView editTextOKBtn,currentActiveTextView=null;
+    TextView currentActiveTextView=null;
 
     SharedPreferences sharedPreferences;
 
@@ -309,47 +314,99 @@ public class HomeActivity extends AppCompatActivity implements View.OnClickListe
         View.OnClickListener editTextOnClick = new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                TextView thisview = ((TextView) view);
-                mainNamesEditText.setVisibility(View.VISIBLE);
-                mainNamesEditText.requestFocus();
-                mainNamesEditText.setText(thisview.getText().toString());
-                mainNamesEditText.setSelection(thisview.getText().length());
-                InputMethodManager imm = (InputMethodManager) getSystemService(INPUT_METHOD_SERVICE);
-                imm.showSoftInput(mainNamesEditText, InputMethodManager.SHOW_IMPLICIT);
+                final TextView thisview = (TextView) view;
+                final String originalText = thisview.getText().toString();
                 currentActiveTextView = thisview;
-            }
-        };
 
-        View.OnClickListener hideEditTextOnClick = new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                mainNamesEditText.clearFocus();
-                mainNamesEditText.setVisibility(View.GONE);
-                if(currentActiveTextView!=null && !((mainNamesEditText.getText().toString()).equals("")) && mainNamesEditText.getText().toString().length()>=3) {
-                    currentActiveTextView.setText(mainNamesEditText.getText().toString());
-                    if(currentActiveTextView.getId()==p2l1player1name.getId()) {
-                        p2l2player1name.setText(mainNamesEditText.getText().toString());
-                    } else if(currentActiveTextView.getId()==p2l1player2name.getId()) {
-                        p2l2player2name.setText(mainNamesEditText.getText().toString());
-                    } else if(currentActiveTextView.getId()==p2l2player1name.getId()) {
-                        p2l1player1name.setText(mainNamesEditText.getText().toString());
-                    } else if(currentActiveTextView.getId()==p2l2player2name.getId()) {
-                        p2l1player2name.setText(mainNamesEditText.getText().toString());
+                final EditText input = new EditText(HomeActivity.this);
+                input.setInputType(android.text.InputType.TYPE_CLASS_TEXT);
+                input.setFilters(new android.text.InputFilter[]{new android.text.InputFilter.LengthFilter(12)});
+                input.setText(originalText);
+                input.selectAll();
+
+                input.addTextChangedListener(new TextWatcher() {
+                    @Override public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+                    @Override public void onTextChanged(CharSequence s, int start, int before, int count) {}
+                    @Override
+                    public void afterTextChanged(Editable s) {
+                        if (s.length() == 0) return;
+                        String text = s.toString();
+                        thisview.setText(text);
+                        if (thisview.getId() == p2l1player1name.getId()) {
+                            p2l2player1name.setText(text);
+                        } else if (thisview.getId() == p2l1player2name.getId()) {
+                            p2l2player2name.setText(text);
+                        } else if (thisview.getId() == p2l2player1name.getId()) {
+                            p2l1player1name.setText(text);
+                        } else if (thisview.getId() == p2l2player2name.getId()) {
+                            p2l1player2name.setText(text);
+                        } else if (thisview.getId() == playerNameBtnComTextView.getId()) {
+                            usernamehomescreen.setText(text);
+                            stcsusernametextview.setText(text);
+                        }
                     }
-                    if(currentActiveTextView.getId() == playerNameBtnComTextView.getId()) {
-                        SharedPreferences.Editor editor = sharedPreferences.edit();
-                        String username = mainNamesEditText.getText().toString();
-                        editor.putString("username",username);
-                        editor.apply();
-                        usernamehomescreen.setText(username);
-                        stcsusernametextview.setText(username);
-                        playerNameBtnComTextView.setText(username);
+                });
+
+                new AlertDialog.Builder(HomeActivity.this)
+                    .setView(input)
+                    .setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            String text = input.getText().toString().trim();
+                            if (text.length() >= 3) {
+                                thisview.setText(text);
+                                if (thisview.getId() == p2l1player1name.getId()) {
+                                    p2l2player1name.setText(text);
+                                } else if (thisview.getId() == p2l1player2name.getId()) {
+                                    p2l2player2name.setText(text);
+                                } else if (thisview.getId() == p2l2player1name.getId()) {
+                                    p2l1player1name.setText(text);
+                                } else if (thisview.getId() == p2l2player2name.getId()) {
+                                    p2l1player2name.setText(text);
+                                }
+                                if (thisview.getId() == playerNameBtnComTextView.getId()) {
+                                    SharedPreferences.Editor editor = sharedPreferences.edit();
+                                    editor.putString("username", text);
+                                    editor.apply();
+                                    usernamehomescreen.setText(text);
+                                    stcsusernametextview.setText(text);
+                                    playerNameBtnComTextView.setText(text);
+                                }
+                            } else {
+                                thisview.setText(originalText);
+                                if (thisview.getId() == p2l1player1name.getId()) p2l2player1name.setText(originalText);
+                                else if (thisview.getId() == p2l1player2name.getId()) p2l2player2name.setText(originalText);
+                                else if (thisview.getId() == p2l2player1name.getId()) p2l1player1name.setText(originalText);
+                                else if (thisview.getId() == p2l2player2name.getId()) p2l1player2name.setText(originalText);
+                                else if (thisview.getId() == playerNameBtnComTextView.getId()) {
+                                    usernamehomescreen.setText(originalText);
+                                    stcsusernametextview.setText(originalText);
+                                }
+                            }
+                        }
+                    })
+                    .setNegativeButton("Annuler", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            thisview.setText(originalText);
+                            if (thisview.getId() == p2l1player1name.getId()) p2l2player1name.setText(originalText);
+                            else if (thisview.getId() == p2l1player2name.getId()) p2l2player2name.setText(originalText);
+                            else if (thisview.getId() == p2l2player1name.getId()) p2l1player1name.setText(originalText);
+                            else if (thisview.getId() == p2l2player2name.getId()) p2l1player2name.setText(originalText);
+                            else if (thisview.getId() == playerNameBtnComTextView.getId()) {
+                                usernamehomescreen.setText(originalText);
+                                stcsusernametextview.setText(originalText);
+                            }
+                        }
+                    })
+                    .show();
+
+                input.post(new Runnable() {
+                    @Override public void run() {
+                        InputMethodManager imm = (InputMethodManager) getSystemService(INPUT_METHOD_SERVICE);
+                        imm.showSoftInput(input, InputMethodManager.SHOW_IMPLICIT);
                     }
-                }
-                try {
-                    InputMethodManager imm = (InputMethodManager) getSystemService(INPUT_METHOD_SERVICE);
-                    imm.hideSoftInputFromWindow(mainNamesEditText.getWindowToken(), 0);
-                } catch (Exception e) {};
+                });
             }
         };
 
@@ -576,7 +633,6 @@ public class HomeActivity extends AppCompatActivity implements View.OnClickListe
 
         // setting listeners for second login layout/guest profile layout
 
-        guestprofilecreateoreditlayout.setOnClickListener(hideEditTextOnClick);
         pselecturctrybtn.setOnTouchListener(clickEffect);plgnwfbbtn.setOnTouchListener(clickEffect);psnwgglbtn.setOnTouchListener(clickEffect);psnwpgbtn.setOnTouchListener(clickEffect);pcontinuebtn.setOnTouchListener(clickEffect);
         pselecturctrybtn.setOnClickListener(noInternetOnClick);plgnwfbbtn.setOnClickListener(noInternetOnClick);psnwgglbtn.setOnClickListener(noInternetOnClick);psnwpgbtn.setOnClickListener(noInternetOnClick);
 
@@ -831,8 +887,6 @@ public class HomeActivity extends AppCompatActivity implements View.OnClickListe
         ConstraintLayout.LayoutParams thisparams = (ConstraintLayout.LayoutParams) passnplayclassiclayout.getLayoutParams();
         thisparams.height = (int)(pxHeight+getStatusBarHeight()+60);
 
-        //passnplayclassiclayout.setOnTouchListener(opaqueLayout);
-        passnplayclassiclayout.setOnClickListener(hideEditTextOnClick);
         pnpclassicbackbtn.setOnTouchListener(clickEffect);
         pnpclassicbackbtn.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -1579,7 +1633,6 @@ public class HomeActivity extends AppCompatActivity implements View.OnClickListe
         thisparams.height = (int)(pxHeight+getStatusBarHeight()+60);
 
         pnpteamuplayout.setOnTouchListener(opaqueLayout);
-        pnpteamuplayout.setOnClickListener(hideEditTextOnClick);
         pnpt2backbtn.setOnTouchListener(clickEffect);
 
         pnpt2help.setOnTouchListener(clickEffect);
@@ -1804,7 +1857,6 @@ public class HomeActivity extends AppCompatActivity implements View.OnClickListe
             }
         });
 
-        editTextOKBtn.setOnClickListener(hideEditTextOnClick);
         initPenaltyModeLayout();
     }
 
@@ -2256,9 +2308,6 @@ public class HomeActivity extends AppCompatActivity implements View.OnClickListe
         compl2backbtn = findViewById(R.id.compl2backbtn2);
         compl2playbtn = findViewById(R.id.computermainplaybtn);
 
-        // editText and editText OK btn
-        mainNamesEditText = findViewById(R.id.editTextText);
-        editTextOKBtn = findViewById(R.id.edittextokbtn);
 
 
 
