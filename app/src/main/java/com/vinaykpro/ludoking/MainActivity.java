@@ -2681,7 +2681,7 @@ public class MainActivity extends AppCompatActivity {
         if (penaltyMode == 2 && skipTurnPlayerIndices.contains(thisPlayerIndex)) {
             skipTurnPlayerIndices.remove(thisPlayerIndex);
             if(currentPlayerIndex>=(players.size()-1)) { currentPlayerIndex = 0; } else { currentPlayerIndex++; }
-            showPenaltyMessage("⏭ " + currentPlayer.name + " — tour sauté pour avoir manqué une capture!");
+            showPenaltyMessage("⏭ " + currentPlayer.name + " — turn skipped for missing a capture!");
             globalHandler.postDelayed(() -> {
                 switchPlayers();
                 d.isDiceClickable = true;

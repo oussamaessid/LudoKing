@@ -49,7 +49,6 @@ public class HomeActivity extends AppCompatActivity implements View.OnClickListe
     double pxHeight;
     MediaPlayer m,clickSoundEffect;
     ConstraintLayout topNavBar,coinAndDiamondBG,settingspopupbg,guestprofilecreateoreditlayout,statisticslayout, passnplaylayout,passnplayclassiclayout,p2layout,p3layout,p4layout,pnpteamuplayout,computerlayout,computerclassiclayout,computerrushmode;
-    ObjectAnimator rotateAnimator;
     TextView nointernet;
 
     Handler nointernethandler;
@@ -201,12 +200,6 @@ public class HomeActivity extends AppCompatActivity implements View.OnClickListe
                         }
                     }
                 }.getView());
-        rotateAnimator = ObjectAnimator.ofFloat(findViewById(R.id.imageView21),"rotation",0,360);
-        rotateAnimator.setDuration(900);
-        rotateAnimator.setRepeatCount(ObjectAnimator.INFINITE);
-        rotateAnimator.setRepeatMode(ObjectAnimator.RESTART);
-        rotateAnimator.setInterpolator(new LinearInterpolator());
-        rotateAnimator.start();
 
 
         // player login logic
