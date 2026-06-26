@@ -4938,17 +4938,25 @@
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 
-    <ImageView
+    <TextView
         android:id="@+id/nointernet"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginBottom="35dp"
+        android:background="@drawable/update_banner_bg"
+        android:fontFamily="@font/rcbold"
+        android:gravity="center"
+        android:paddingTop="12dp"
+        android:paddingBottom="12dp"
+        android:text="⏳ Attendre le prochain update !"
+        android:textColor="@color/white"
+        android:textSize="15sp"
+        android:textStyle="bold"
         android:visibility="gone"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintWidth_percent="0.75"
-        app:srcCompat="@drawable/nointernet" />
+        app:layout_constraintWidth_percent="0.75" />
 
     <EditText
         android:id="@+id/editTextText"
@@ -5064,6 +5072,14 @@
                         android:src="@drawable/ic_elimination" />
 
                     <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="4dp"
+                        android:text="Pièce capturée = joueur éliminé définitivement"
+                        android:textColor="#AAAACC"
+                        android:textSize="11sp" />
+
+                    <TextView
                         android:id="@+id/mode1selectedtag"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
@@ -5109,6 +5125,14 @@
                         android:src="@drawable/ic_toursaute" />
 
                     <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="4dp"
+                        android:text="Pièce capturée = prochain tour perdu"
+                        android:textColor="#AAAACC"
+                        android:textSize="11sp" />
+
+                    <TextView
                         android:id="@+id/mode2selectedtag"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
@@ -5152,6 +5176,14 @@
                         android:layout_height="wrap_content"
                         android:adjustViewBounds="true"
                         android:src="@drawable/ic_avertissement" />
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="4dp"
+                        android:text="La victime prend le contrôle des pièces du captureur au prochain tour"
+                        android:textColor="#AAAACC"
+                        android:textSize="11sp" />
 
                     <TextView
                         android:id="@+id/mode3selectedtag"

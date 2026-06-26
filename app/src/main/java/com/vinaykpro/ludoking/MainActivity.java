@@ -186,8 +186,8 @@ public class MainActivity extends AppCompatActivity {
     // Penalty mode: 1=Kill, 2=SkipTurn, 3=Warning+Replacement
     int penaltyMode = 1;
     java.util.Set<Integer> skipTurnPlayerIndices = new HashSet<>();
-    int mode3PenaltyPlayerIndex = -1;
-    String mode3VictimColor = null;
+    int mode3PunisherIndex = -1;
+    String mode3SurvivorColor = null;
 
     TextView penaltyMessageView;
 
@@ -1186,6 +1186,10 @@ public class MainActivity extends AppCompatActivity {
                         }
                         if(!safeSpots.contains(targetBox)) {
                             p.die();
+                            if (penaltyMode == 3 && mode3PunisherIndex == -1) {
+                                mode3PunisherIndex = currentPlayerIndex > 0 ? currentPlayerIndex - 1 : players.size() - 1;
+                                mode3SurvivorColor = p.colour;
+                            }
                             return true;
                         }
                     }
@@ -1251,11 +1255,6 @@ public class MainActivity extends AppCompatActivity {
             showPenaltyMessage("⏭ " + punisherName + " missed killing " + survivorName + "'s piece! Next turn will be skipped.");
             afterMove.run();
         } else if (penaltyMode == 3) {
-            if (mode3PenaltyPlayerIndex == -1) {
-                mode3PenaltyPlayerIndex = penaltyPlayerIdx;
-                mode3VictimColor = (survivorPiece != null) ? survivorPiece.colour : penaltyPiece.colour;
-                showPenaltyMessage("⚠ " + punisherName + " failed to eliminate " + survivorName + "'s piece!");
-            }
             afterMove.run();
         } else {
             afterMove.run();
@@ -2678,11 +2677,11 @@ public class MainActivity extends AppCompatActivity {
         int thisPlayerIndex = currentPlayerIndex;
         Player currentPlayer = players.get(thisPlayerIndex);
 
-        // Mode 2: skip this player's turn
+        // Mode 2: skip this player's turn (missed a kill)
         if (penaltyMode == 2 && skipTurnPlayerIndices.contains(thisPlayerIndex)) {
             skipTurnPlayerIndices.remove(thisPlayerIndex);
             if(currentPlayerIndex>=(players.size()-1)) { currentPlayerIndex = 0; } else { currentPlayerIndex++; }
-            showPenaltyMessage("⏭ Punisher: " + currentPlayer.name + " — turn skipped for missing a kill!");
+            showPenaltyMessage("⏭ " + currentPlayer.name + " — tour sauté pour avoir manqué une capture!");
             globalHandler.postDelayed(() -> {
                 switchPlayers();
                 d.isDiceClickable = true;
@@ -2690,25 +2689,25 @@ public class MainActivity extends AppCompatActivity {
             return;
         }
 
-        // Mode 3: let the victim play in place of the penalized player
-        if (penaltyMode == 3 && mode3PenaltyPlayerIndex == thisPlayerIndex && mode3VictimColor != null) {
-            String victimColor = mode3VictimColor;
-            mode3PenaltyPlayerIndex = -1;
-            mode3VictimColor = null;
-            Player victimPlayer = getPlayerByColor(victimColor);
-            if (victimPlayer != null) {
-                showPenaltyMessage("⚠ " + currentPlayer.name + " missed a kill! " + victimPlayer.name + " (the one who survived) plays this turn instead.");
-                currentPlayerColor = victimColor;
-                currentPlayerPosition = victimPlayer.position;
-                currentPlayerName = victimPlayer.name;
-                currentPlayerSelectedIndex = victimPlayer.index;
+        // Mode 3: survivor takes control of punisher's pieces for one turn
+        if (penaltyMode == 3 && mode3PunisherIndex == thisPlayerIndex && mode3SurvivorColor != null) {
+            Player survivorPlayer = getPlayerByColor(mode3SurvivorColor);
+            mode3PunisherIndex = -1;
+            mode3SurvivorColor = null;
+            if (survivorPlayer != null) {
+                showPenaltyMessage("🎮 " + survivorPlayer.name + " takes control of " + currentPlayer.name + "'s pieces this turn!");
+                // Survivor rolls and moves using the punisher's color/pieces
+                currentPlayerColor = currentPlayer.getColor();
+                currentPlayerPosition = currentPlayer.getPosition();
+                currentPlayerSelectedIndex = currentPlayer.getIndex();
+                currentPlayerName = survivorPlayer.name;
                 currentPlayer.setActive();
-                if (victimPlayer.isBot) {
+                if (survivorPlayer.isBot) {
                     hintArrow.setVisibility(GONE);
-                    moveDice(victimPlayer.position);
+                    moveDice(currentPlayerPosition);
                     new Handler().postDelayed(() -> d.roll(), 150);
                 } else {
-                    moveDice(victimPlayer.position);
+                    moveDice(currentPlayerPosition);
                     hintArrow.setVisibility(View.VISIBLE);
                 }
                 if(currentPlayerIndex>=(players.size()-1)) { currentPlayerIndex = 0; } else { currentPlayerIndex++; }

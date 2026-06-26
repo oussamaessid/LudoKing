@@ -50,7 +50,7 @@ public class HomeActivity extends AppCompatActivity implements View.OnClickListe
     MediaPlayer m,clickSoundEffect;
     ConstraintLayout topNavBar,coinAndDiamondBG,settingspopupbg,guestprofilecreateoreditlayout,statisticslayout, passnplaylayout,passnplayclassiclayout,p2layout,p3layout,p4layout,pnpteamuplayout,computerlayout,computerclassiclayout,computerrushmode;
     ObjectAnimator rotateAnimator;
-    ImageView nointernet;
+    TextView nointernet;
 
     Handler nointernethandler;
     Runnable nointernetrunnable;
