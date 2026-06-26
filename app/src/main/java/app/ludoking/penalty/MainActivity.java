@@ -1,4 +1,4 @@
-package com.vinaykpro.ludoking;
+package app.ludoking.penalty;
 
 import static android.view.View.GONE;
 
@@ -56,6 +56,8 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
+
+import app.ludoking.penalty.R;
 
 public class MainActivity extends AppCompatActivity {
     DisplayMetrics displayMetrics;

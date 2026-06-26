@@ -1,4 +1,4 @@
-package com.vinaykpro.ludoking;
+package app.ludoking.penalty;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.res.ResourcesCompat;
@@ -14,6 +14,8 @@ import android.view.WindowInsetsController;
 import android.view.WindowManager;
 
 import java.util.Objects;
+
+import app.ludoking.penalty.R;
 
 public class SplashActivity extends AppCompatActivity {
     @Override

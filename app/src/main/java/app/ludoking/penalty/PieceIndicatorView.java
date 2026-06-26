@@ -1,4 +1,4 @@
-package com.vinaykpro.ludoking;
+package app.ludoking.penalty;
 
 import android.content.Context;
 import android.content.res.TypedArray;
@@ -7,6 +7,8 @@ import android.graphics.DashPathEffect;
 import android.graphics.Paint;
 import android.util.AttributeSet;
 import androidx.appcompat.widget.AppCompatImageView;
+
+import app.ludoking.penalty.R;
 
 public class PieceIndicatorView extends AppCompatImageView {
 

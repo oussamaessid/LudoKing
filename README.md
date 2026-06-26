@@ -2,67 +2,78 @@
 
 ## Overview
 
-Welcome to the repository for my Ludo King Clone project! This project was developed as a demonstration of my Android app development skills using Android Studio. Inspired by the popular Ludo King game, I aimed to recreate the classic board game experience for mobile devices.
+Welcome to the repository for my Ludo King Clone project! This project was developed as a demonstration of my Android app development skills using Android Studio. Inspired by the popular Ludo King game, I aimed to recreate the classic board game experience for mobile devices — with an added **Penalty Mode** that brings a new layer of strategy and consequence to every match.
 
 ## Game Preview
 
 ![Ludo King Clone Preview](https://github.com/Vinaykpro/Ludo_King_Clone/blob/master/ludo_clone_preview.gif)
 
-Watch a quick preview of the Ludo King Clone to see the gameplay in action!
-
-## Controlling game with remote preview
-
-![Remote Control Preview](https://github.com/Vinaykpro/Ludo_King_Clone/blob/master/remotecontrolled.gif)
-
-We can control this game remotely so that one could always win 😜 you can watch the full video here in my youtube channel:
-https://youtu.be/LZA4MgA7pQo?feature=shared
-
-
 ## Features
 
-- **Gameplay Replication:** The project faithfully reproduces the gameplay mechanics of the classic Ludo King, allowing users to experience the thrill of the game on their Android devices.
+### Game Modes
+- **Classic** — Standard Ludo rules for 2–4 players
+- **Team Up** — Players compete in teams
+- **Quick** — Shorter match variant
+- **vs Computer (AI)** — Play against bot-controlled opponents
 
-- **Multiplayer Support:** I have implemented a multiplayer functionality that enables users to play against their friends in real-time, just like the original game.
+### Penalty Mode (Added Feature)
+Before each match, players select one of three penalty strategies applied when a player ignores an available kill:
 
-- **Customization Options:** Users can customize their gaming experience by choosing from different player tokens, board designs, and avatars.
+| Mode | Punishment |
+|------|-----------|
+| **Kill Penalty** | The offending player's piece is sent back home |
+| **Skip Turn** | The offending player loses their next turn |
+| **Warning + Replacement** | First offense shows a warning and records the victim; on the next turn the victim plays in the offender's place |
 
-- **Responsive UI:** The user interface is designed to be intuitive and responsive, providing a seamless gaming experience across various screen sizes.
+### Other Features
+- Pass-and-play local multiplayer (up to 4 players)
+- Customizable player names and token colors
+- Bot players per individual slot
+- In-game penalty message overlay for real-time feedback
 
 ## Technologies Used
 
 - **Android Studio:** The project is developed using Android Studio, making use of its powerful tools and features for Android app development.
+- **Java Programming Language:** Java is used for all backend game logic, ensuring efficient and reliable performance.
+- **ConstraintLayout / XML:** Responsive UI designed to work across various screen sizes.
 
-- **Java Programming Language:** I utilized Java to write the backend logic of the game, ensuring efficient and reliable performance.
+## Project Structure
+
+```
+app/src/main/
+├── java/.../
+│   ├── SplashActivity.java     # Startup splash screen
+│   ├── HomeActivity.java       # Menus, mode selection, penalty mode screen
+│   └── MainActivity.java       # All game logic (board, dice, pieces, penalty engine)
+└── res/
+    ├── layout/
+    │   ├── activity_home.xml   # Home/menu layouts + penalty mode overlay
+    │   └── activity_main.xml   # Game board layout + in-game penalty message view
+    └── values/
+        └── strings.xml
+```
 
 ## How to Use
 
-If you're interested in exploring the source code or contributing to the development of my Ludo King Clone Project, follow these steps:
-
 1. **Clone the Repository:**
    ```bash
-   git clone https://github.com/Vinaykpro/Ludo_King_Clone.git
-
-‎ ‎ ‎ This command retrieves the source code of the game to your local machine.
+   git clone https://github.com/OussamaEssid/Ludo_King_Penalty.git
+   ```
 
 2. **Open in Android Studio:**
-Open the cloned project in Android Studio to explore the codebase.
+   Open the cloned project and let Gradle sync finish.
 
-3. **Review and Contribute:**
-Feel free to review the code, submit issues, or contribute to the project by sending pull requests. Your contributions are highly appreciated!
+3. **Run on device or emulator:**
+   Select a target device and press **Run**.
 
-## Experience the Game
+## How to Play
 
-If you simply want to experience the Ludo King Clone without exploring the source code, you can download the APK file and install it on your Android device.
+1. Launch the app and choose a game mode from the home screen.
+2. Select a **Penalty Mode** (Kill / Skip / Warning) before the match starts.
+3. Configure player names, colors, and which slots are controlled by bots.
+4. Tap **Start** — the board launches with penalty rules active.
+5. Any player who rolls a killable number and ignores it will face the chosen penalty.
 
-![Installation preview](https://github.com/Vinaykpro/Ludo_King_Clone/blob/master/installation_preview.gif)
+## Developer
 
-1. **Download the APK:**
-   Click [Here](https://dl.dropboxusercontent.com/scl/fi/1xohp4h0t8t7uuicmfdxf/Ludo-King-Clone-by-Vinaykpro.apk?rlkey=597fiav4fxbfgohvydkvm7mzm&dl=0) to download the APK file.
-
-2. **Install on Your Device:**
-   Transfer the downloaded APK file to your Android device and install it. Make sure to enable the installation of apps from unknown sources in your device settings.
-
-3. **Enjoy the Game:**
-   Once installed, open the app on your device and enjoy playing the Ludo King Clone!
-
-Feel free to explore the source code or contribute to the project.
+Developed by **Oussama Essid** as a portfolio Android project.

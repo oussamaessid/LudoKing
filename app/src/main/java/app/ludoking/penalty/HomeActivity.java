@@ -1,4 +1,4 @@
-package com.vinaykpro.ludoking;
+package app.ludoking.penalty;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -41,6 +41,8 @@ import com.bumptech.glide.request.target.DrawableImageViewTarget;
 import com.bumptech.glide.request.transition.Transition;
 
 import java.util.Objects;
+
+import app.ludoking.penalty.R;
 
 public class HomeActivity extends AppCompatActivity implements View.OnClickListener {
     double dpHeight;

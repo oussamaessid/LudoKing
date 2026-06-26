@@ -160,7 +160,7 @@
                 app:layout_constraintTop_toBottomOf="@+id/imageView6"
                 app:srcCompat="@drawable/shadow_circle" />
 
-            <com.vinaykpro.ludoking.PieceIndicatorView
+            <app.ludoking.penalty.PieceIndicatorView
                 android:id="@+id/red1activecircle"
                 android:layout_width="27dp"
                 android:layout_height="27dp"
@@ -208,7 +208,7 @@
                 app:layout_constraintTop_toBottomOf="@+id/imageView62"
                 app:srcCompat="@drawable/shadow_circle" />
 
-            <com.vinaykpro.ludoking.PieceIndicatorView
+            <app.ludoking.penalty.PieceIndicatorView
                 android:id="@+id/red2activecircle"
                 android:layout_width="27dp"
                 android:layout_height="27dp"
@@ -256,7 +256,7 @@
                 app:layout_constraintTop_toBottomOf="@+id/imageView63"
                 app:srcCompat="@drawable/shadow_circle" />
 
-            <com.vinaykpro.ludoking.PieceIndicatorView
+            <app.ludoking.penalty.PieceIndicatorView
                 android:id="@+id/red3activecircle"
                 android:layout_width="27dp"
                 android:layout_height="27dp"
@@ -304,7 +304,7 @@
                 app:layout_constraintTop_toBottomOf="@+id/imageView64"
                 app:srcCompat="@drawable/shadow_circle" />
 
-            <com.vinaykpro.ludoking.PieceIndicatorView
+            <app.ludoking.penalty.PieceIndicatorView
                 android:id="@+id/red4activecircle"
                 android:layout_width="27dp"
                 android:layout_height="27dp"
@@ -352,7 +352,7 @@
                 app:layout_constraintTop_toBottomOf="@+id/imageView51"
                 app:srcCompat="@drawable/shadow_circle" />
 
-            <com.vinaykpro.ludoking.PieceIndicatorView
+            <app.ludoking.penalty.PieceIndicatorView
                 android:id="@+id/green1activecircle"
                 android:layout_width="27dp"
                 android:layout_height="27dp"
@@ -400,7 +400,7 @@
                 app:layout_constraintTop_toBottomOf="@+id/imageView52"
                 app:srcCompat="@drawable/shadow_circle" />
 
-            <com.vinaykpro.ludoking.PieceIndicatorView
+            <app.ludoking.penalty.PieceIndicatorView
                 android:id="@+id/green2activecircle"
                 android:layout_width="27dp"
                 android:layout_height="27dp"
@@ -448,7 +448,7 @@
                 app:layout_constraintTop_toBottomOf="@+id/imageView53"
                 app:srcCompat="@drawable/shadow_circle" />
 
-            <com.vinaykpro.ludoking.PieceIndicatorView
+            <app.ludoking.penalty.PieceIndicatorView
                 android:id="@+id/green3activecircle"
                 android:layout_width="27dp"
                 android:layout_height="27dp"
@@ -496,7 +496,7 @@
                 app:layout_constraintTop_toBottomOf="@+id/imageView54"
                 app:srcCompat="@drawable/shadow_circle" />
 
-            <com.vinaykpro.ludoking.PieceIndicatorView
+            <app.ludoking.penalty.PieceIndicatorView
                 android:id="@+id/green4activecircle"
                 android:layout_width="27dp"
                 android:layout_height="27dp"
@@ -544,7 +544,7 @@
                 app:layout_constraintTop_toBottomOf="@+id/imageView41"
                 app:srcCompat="@drawable/shadow_circle" />
 
-            <com.vinaykpro.ludoking.PieceIndicatorView
+            <app.ludoking.penalty.PieceIndicatorView
                 android:id="@+id/blue1activecircle"
                 android:layout_width="27dp"
                 android:layout_height="27dp"
@@ -592,7 +592,7 @@
                 app:layout_constraintTop_toBottomOf="@+id/imageView42"
                 app:srcCompat="@drawable/shadow_circle" />
 
-            <com.vinaykpro.ludoking.PieceIndicatorView
+            <app.ludoking.penalty.PieceIndicatorView
                 android:id="@+id/blue2activecircle"
                 android:layout_width="27dp"
                 android:layout_height="27dp"
@@ -640,7 +640,7 @@
                 app:layout_constraintTop_toBottomOf="@+id/imageView43"
                 app:srcCompat="@drawable/shadow_circle" />
 
-            <com.vinaykpro.ludoking.PieceIndicatorView
+            <app.ludoking.penalty.PieceIndicatorView
                 android:id="@+id/blue3activecircle"
                 android:layout_width="27dp"
                 android:layout_height="27dp"
@@ -688,7 +688,7 @@
                 app:layout_constraintTop_toBottomOf="@+id/imageView44"
                 app:srcCompat="@drawable/shadow_circle" />
 
-            <com.vinaykpro.ludoking.PieceIndicatorView
+            <app.ludoking.penalty.PieceIndicatorView
                 android:id="@+id/blue4activecircle"
                 android:layout_width="27dp"
                 android:layout_height="27dp"
@@ -738,7 +738,7 @@
                 app:layout_constraintTop_toBottomOf="@+id/imageView31"
                 app:srcCompat="@drawable/shadow_circle" />
 
-            <com.vinaykpro.ludoking.PieceIndicatorView
+            <app.ludoking.penalty.PieceIndicatorView
                 android:id="@+id/yellow1activecircle"
                 android:layout_width="27dp"
                 android:layout_height="27dp"
@@ -787,7 +787,7 @@
                 app:layout_constraintTop_toBottomOf="@+id/imageView32"
                 app:srcCompat="@drawable/shadow_circle" />
 
-            <com.vinaykpro.ludoking.PieceIndicatorView
+            <app.ludoking.penalty.PieceIndicatorView
                 android:id="@+id/yellow2activecircle"
                 android:layout_width="27dp"
                 android:layout_height="27dp"
@@ -836,7 +836,7 @@
                 app:layout_constraintTop_toBottomOf="@+id/imageView33"
                 app:srcCompat="@drawable/shadow_circle" />
 
-            <com.vinaykpro.ludoking.PieceIndicatorView
+            <app.ludoking.penalty.PieceIndicatorView
                 android:id="@+id/yellow3activecircle"
                 android:layout_width="27dp"
                 android:layout_height="27dp"
@@ -885,7 +885,7 @@
                 app:layout_constraintTop_toBottomOf="@+id/imageView34"
                 app:srcCompat="@drawable/shadow_circle" />
 
-            <com.vinaykpro.ludoking.PieceIndicatorView
+            <app.ludoking.penalty.PieceIndicatorView
                 android:id="@+id/yellow4activecircle"
                 android:layout_width="27dp"
                 android:layout_height="27dp"
