@@ -182,16 +182,27 @@ public class MainActivity extends AppCompatActivity {
     boolean isSoundOn=true,isMusicOn=false;
 
     List<Piece> killCapablePieces = new ArrayList<>();
+    List<Piece> allKillTargets = new ArrayList<>();
     boolean captureCheckPending = false;
     Piece bestKillCapablePiece = null;
 
     // Penalty mode: 1=Kill, 2=SkipTurn, 3=Warning+Replacement
     int penaltyMode = 1;
-    java.util.Set<Integer> skipTurnPlayerIndices = new HashSet<>();
+    java.util.Set<String> skipTurnColors = new HashSet<>();
+    // Saved at dice-roll time from the pieces — never recalculated
+    Player pendingPunisherPlayer       = null; // who had the chance to kill but didn't
+    List<Player> pendingVictimPlayers  = new ArrayList<>(); // all unique players whose pieces could have been killed
     int mode3PunisherIndex = -1;
+    int mode3SurvivorIndex = -1;
     String mode3SurvivorColor = null;
+    String mode3PunisherColor = null;
+    String mode3PunisherName = null;
+    String mode3SurvivorName = null;
 
     TextView penaltyMessageView;
+
+    ConstraintLayout mode3ReminderCard;
+    TextView mode3PunisherText, mode3ReplacedText, mode3TurnText;
 
     int botwins=0,botloses=0;
 
@@ -256,15 +267,13 @@ public class MainActivity extends AppCompatActivity {
                 this.piece.setOnClickListener(view -> {
                     if (isAlive && isClickable && currentPlayerColor.equals(colour)) {
                         boolean hasPenalty = captureCheckPending && !killCapablePieces.contains(this) && bestKillCapablePiece != null;
-                        Piece penaltyPiece = hasPenalty ? bestKillCapablePiece : null;
-                        Piece survivorPiece = hasPenalty ? getKillTarget(bestKillCapablePiece, currentPlayerDice) : null;
-                        int penaltyPlayerIdx = currentPlayerIndex > 0 ? currentPlayerIndex - 1 : players.size() - 1;
+                        Piece attackerPiece = hasPenalty ? bestKillCapablePiece : null;
                         clearCaptureState();
                         int diceCopy = currentPlayerDice;
                         currentPlayerDice = -1;
                         for (Piece p : getPiecesByColor(colour)) { p.inactiveState(); }
                         if (hasPenalty) {
-                            applyPenaltyAndMove(penaltyPiece, survivorPiece, penaltyPlayerIdx, () -> {
+                            applyPenaltyAndMove(attackerPiece, () -> {
                                 checkAdjustments(currBlock);
                                 diceValue = diceCopy;
                                 move(diceValue);
@@ -276,14 +285,12 @@ public class MainActivity extends AppCompatActivity {
                         }
                     } else if (!isAlive && currentPlayerColor.equals(colour) && currentPlayerDice == 6) {
                         boolean hasPenalty = captureCheckPending && bestKillCapablePiece != null;
-                        Piece penaltyPiece = hasPenalty ? bestKillCapablePiece : null;
-                        Piece survivorPiece = hasPenalty ? getKillTarget(bestKillCapablePiece, currentPlayerDice) : null;
-                        int penaltyPlayerIdx = currentPlayerIndex > 0 ? currentPlayerIndex - 1 : players.size() - 1;
+                        Piece attackerPiece = hasPenalty ? bestKillCapablePiece : null;
                         clearCaptureState();
                         currentPlayerDice = -1;
                         for (Piece p : getPiecesByColor(colour)) { p.inactiveState(); }
                         if (hasPenalty) {
-                            applyPenaltyAndMove(penaltyPiece, survivorPiece, penaltyPlayerIdx, this::makeAlive);
+                            applyPenaltyAndMove(attackerPiece, this::makeAlive);
                         } else {
                             makeAlive();
                         }
@@ -1188,10 +1195,6 @@ public class MainActivity extends AppCompatActivity {
                         }
                         if(!safeSpots.contains(targetBox)) {
                             p.die();
-                            if (penaltyMode == 3 && mode3PunisherIndex == -1) {
-                                mode3PunisherIndex = currentPlayerIndex > 0 ? currentPlayerIndex - 1 : players.size() - 1;
-                                mode3SurvivorColor = p.colour;
-                            }
                             return true;
                         }
                     }
@@ -1233,34 +1236,87 @@ public class MainActivity extends AppCompatActivity {
         return null;
     }
 
+    private Piece pickVictimPiece(int diceValue) {
+        java.util.LinkedHashSet<String> seen = new java.util.LinkedHashSet<>();
+        List<Piece> targets = new ArrayList<>();
+        for (Piece kp : killCapablePieces) {
+            Piece kt = getKillTarget(kp, diceValue);
+            if (kt != null && seen.add(kt.colour)) targets.add(kt);
+        }
+        if (targets.isEmpty()) return getKillTarget(bestKillCapablePiece, diceValue);
+        return targets.get((int)(Math.random() * targets.size()));
+    }
+
     private void clearCaptureState() {
         killCapablePieces.clear();
+        allKillTargets.clear();
         captureCheckPending = false;
         bestKillCapablePiece = null;
     }
 
-    private void applyPenaltyAndMove(Piece penaltyPiece, Piece survivorPiece, int penaltyPlayerIdx, Runnable afterMove) {
-        String punisherName = penaltyPlayerIdx < players.size() ? players.get(penaltyPlayerIdx).name : "Player";
-        Player survivorPlayer = (survivorPiece != null) ? getPlayerByColor(survivorPiece.colour) : null;
-        String survivorName = (survivorPlayer != null) ? survivorPlayer.name : "Opponent";
+    private String getBoardName(Player player) {
+        if (player == null) return "?";
+        try {
+            String n = player.playerNameTextView.getText().toString().trim();
+            return n.isEmpty() ? player.name : n;
+        } catch (Exception e) {
+            return player.name;
+        }
+    }
+
+    private void applyPenaltyAndMove(Piece attackerPiece, Runnable afterMove) {
+        // Snapshot before clearing — local finals are immune to any future state change
+        final String punisherName  = getBoardName(pendingPunisherPlayer);
+        final String punisherColor = (pendingPunisherPlayer != null) ? pendingPunisherPlayer.color : currentPlayerColor;
+        final List<Player> victims = new ArrayList<>(pendingVictimPlayers);
+        // Pick a random victim for Mode 3; use first victim for messages when list has one entry
+        final Player randomVictim  = victims.isEmpty() ? null : victims.get((int)(Math.random() * victims.size()));
+        // Build the merged victim names string
+        final String victimNames   = buildVictimNamesString(victims);
+        // Clear pending state immediately after snapshot
+        pendingPunisherPlayer = null;
+        pendingVictimPlayers.clear();
+        android.util.Log.d("PENALTY", "apply mode=" + penaltyMode + " punisher=" + punisherName + " victims=" + victimNames);
+
+        final String penaltyMsg = "⚠️ " + punisherName + " avait la chance de tuer une pièce de " + victimNames + " mais ne l'a pas fait.";
 
         if (penaltyMode == 1) {
-            penaltyPiece.pieceIcon.setColorFilter(0xFFFF0000, PorterDuff.Mode.SRC_ATOP);
-            showPenaltyMessage("⚔ " + punisherName + " missed the kill! " + survivorName + "'s piece escapes — penalty applied!");
+            attackerPiece.pieceIcon.setColorFilter(0xFFFF0000, PorterDuff.Mode.SRC_ATOP);
+            showPenaltyMessage(penaltyMsg);
             globalHandler.postDelayed(() -> {
-                penaltyPiece.pieceIcon.clearColorFilter();
-                penaltyPiece.die();
+                attackerPiece.pieceIcon.clearColorFilter();
+                attackerPiece.die();
                 afterMove.run();
             }, 700);
         } else if (penaltyMode == 2) {
-            skipTurnPlayerIndices.add(penaltyPlayerIdx);
-            showPenaltyMessage("⏭ " + punisherName + " missed killing " + survivorName + "'s piece! Next turn will be skipped.");
+            skipTurnColors.add(punisherColor);
+            showPenaltyMessage(penaltyMsg);
             afterMove.run();
         } else if (penaltyMode == 3) {
+            if (randomVictim != null && mode3PunisherColor == null) {
+                mode3PunisherIndex = -1;
+                mode3SurvivorIndex = -1;
+                mode3PunisherColor = punisherColor;
+                mode3SurvivorColor = randomVictim.color;
+                mode3PunisherName  = punisherName;
+                mode3SurvivorName  = getBoardName(randomVictim);
+                showPenaltyMessage(penaltyMsg);
+            }
             afterMove.run();
         } else {
             afterMove.run();
         }
+    }
+
+    private String buildVictimNamesString(List<Player> victims) {
+        if (victims.isEmpty()) return "?";
+        if (victims.size() == 1) return getBoardName(victims.get(0));
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < victims.size(); i++) {
+            if (i > 0) sb.append(i == victims.size() - 1 ? " et " : ", ");
+            sb.append(getBoardName(victims.get(i)));
+        }
+        return sb.toString();
     }
 
     private void showPenaltyMessage(String message) {
@@ -1467,14 +1523,17 @@ public class MainActivity extends AppCompatActivity {
                     consecutiveSixCount = 0;
                 }
 
+                // After two consecutive 6s, the third roll is forced to 1-5 (triple 6 forbidden)
                 if (consecutiveSixCount >= 3) {
                     consecutiveSixCount = 0;
-                    currentPlayerDice = -1;
-                    diceHandler.postDelayed(() -> {
-                        switchPlayers();
-                        isDiceClickable = true;
-                    }, 500);
-                    return;
+                    ch = (int)(Math.random() * 5) + 1;
+                    switch (ch) {
+                        case 1: mainDiceImageView.setImageDrawable(ResourcesCompat.getDrawable(getResources(), R.drawable.dice1, null)); break;
+                        case 2: mainDiceImageView.setImageDrawable(ResourcesCompat.getDrawable(getResources(), R.drawable.dice2, null)); break;
+                        case 3: mainDiceImageView.setImageDrawable(ResourcesCompat.getDrawable(getResources(), R.drawable.dice3, null)); break;
+                        case 4: mainDiceImageView.setImageDrawable(ResourcesCompat.getDrawable(getResources(), R.drawable.dice4, null)); break;
+                        case 5: mainDiceImageView.setImageDrawable(ResourcesCompat.getDrawable(getResources(), R.drawable.dice5, null)); break;
+                    }
                 }
 
                 currentPlayerDice = ch;
@@ -1521,22 +1580,43 @@ public class MainActivity extends AppCompatActivity {
                 }
 
                 killCapablePieces.clear();
+                allKillTargets.clear();
                 bestKillCapablePiece = null;
-                int bestKillTargetSteps = 0;
+                Piece bestKillTargetPiece = null;
+                int bestKillTargetSteps = -1;
                 for (Piece p : pieces) {
                     if (p.isClickable && p.isAlive) {
                         Piece killTarget = getKillTarget(p, ch);
                         if (killTarget != null) {
                             killCapablePieces.add(p);
+                            allKillTargets.add(killTarget);
                             if (killTarget.numberOfSteps > bestKillTargetSteps) {
                                 bestKillTargetSteps = killTarget.numberOfSteps;
                                 bestKillCapablePiece = p;
+                                bestKillTargetPiece = killTarget;
                             }
                         }
                     }
                 }
-                if (!killCapablePieces.isEmpty() && !currentPlayer.isBot && autoMove == null) {
+                if (!killCapablePieces.isEmpty() && !currentPlayer.isBot && autoMove == null && bestKillCapablePiece != null) {
                     captureCheckPending = true;
+                    if (pendingPunisherPlayer == null) {
+                        pendingPunisherPlayer = getPlayerByColor(bestKillCapablePiece.colour);
+                        // Collect all unique victim players from every kill target
+                        pendingVictimPlayers.clear();
+                        java.util.Set<String> seenVictimColors = new java.util.LinkedHashSet<>();
+                        for (Piece target : allKillTargets) {
+                            if (seenVictimColors.add(target.colour)) {
+                                Player vp = getPlayerByColor(target.colour);
+                                if (vp != null) pendingVictimPlayers.add(vp);
+                            }
+                        }
+                    }
+                    StringBuilder dbg = new StringBuilder("detected punisher=")
+                        .append(pendingPunisherPlayer != null ? pendingPunisherPlayer.name : "NULL")
+                        .append(" victims=");
+                    for (Player v : pendingVictimPlayers) dbg.append(v.name).append(",");
+                    android.util.Log.d("PENALTY", dbg.toString());
                 }
 
                 if(autoMove!=null) {
@@ -1865,6 +1945,11 @@ public class MainActivity extends AppCompatActivity {
         penaltyMode = extras.getInt("penaltyMode", 1);
 
         penaltyMessageView = findViewById(R.id.penaltymessageview);
+
+        mode3ReminderCard = findViewById(R.id.mode3remindercard);
+        mode3PunisherText = findViewById(R.id.mode3punishertext);
+        mode3ReplacedText = findViewById(R.id.mode3replacedtext);
+        mode3TurnText = findViewById(R.id.mode3turntext);
 
         playername1.setText(player1name);
         playername2.setText(player2name);
@@ -2676,14 +2761,17 @@ public class MainActivity extends AppCompatActivity {
     {
         if (d != null) d.consecutiveSixCount = 0;
         clearCaptureState();
+        pendingPunisherPlayer = null;
+        pendingVictimPlayers.clear();
+        if (mode3ReminderCard != null) mode3ReminderCard.setVisibility(View.GONE);
         int thisPlayerIndex = currentPlayerIndex;
         Player currentPlayer = players.get(thisPlayerIndex);
 
-        // Mode 2: skip this player's turn (missed a kill)
-        if (penaltyMode == 2 && skipTurnPlayerIndices.contains(thisPlayerIndex)) {
-            skipTurnPlayerIndices.remove(thisPlayerIndex);
+        // Mode 2: skip this player's turn (missed a kill) — tracked by color so index shifts don't corrupt it
+        if (penaltyMode == 2 && skipTurnColors.contains(currentPlayer.color)) {
+            skipTurnColors.remove(currentPlayer.color);
             if(currentPlayerIndex>=(players.size()-1)) { currentPlayerIndex = 0; } else { currentPlayerIndex++; }
-            showPenaltyMessage("⏭ " + currentPlayer.name + " — turn skipped for missing a capture!");
+            showPenaltyMessage("⏭️ Le prochain tour de " + getBoardName(currentPlayer) + " est annulé.");
             globalHandler.postDelayed(() -> {
                 switchPlayers();
                 d.isDiceClickable = true;
@@ -2692,17 +2780,36 @@ public class MainActivity extends AppCompatActivity {
         }
 
         // Mode 3: survivor takes control of punisher's pieces for one turn
-        if (penaltyMode == 3 && mode3PunisherIndex == thisPlayerIndex && mode3SurvivorColor != null) {
+        // Detect by color (not index) so player removals don't corrupt the match
+        if (penaltyMode == 3 && mode3PunisherColor != null && mode3PunisherColor.equals(currentPlayer.getColor()) && mode3SurvivorColor != null) {
             Player survivorPlayer = getPlayerByColor(mode3SurvivorColor);
+            String savedPunisherName = (mode3PunisherName != null) ? mode3PunisherName : getBoardName(currentPlayer);
+            String savedSurvivorName = (mode3SurvivorName != null) ? mode3SurvivorName : getBoardName(survivorPlayer);
             mode3PunisherIndex = -1;
+            mode3SurvivorIndex = -1;
+            mode3PunisherColor = null;
             mode3SurvivorColor = null;
+            mode3PunisherName = null;
+            mode3SurvivorName = null;
             if (survivorPlayer != null) {
-                showPenaltyMessage("🎮 " + survivorPlayer.name + " takes control of " + currentPlayer.name + "'s pieces this turn!");
+                showPenaltyMessage("🎮 " + savedSurvivorName + " joue maintenant à la place de " + savedPunisherName + ".");
+                if (mode3ReminderCard != null) {
+                    mode3PunisherText.setText("⚠️ " + savedPunisherName + " avait la chance de tuer une pièce de " + savedSurvivorName + " mais ne l'a pas fait.");
+                    mode3ReplacedText.setText("🎮 " + savedSurvivorName + " joue maintenant à la place de " + savedPunisherName + ".");
+                    mode3TurnText.setText(savedSurvivorName + " joue à la place de " + savedPunisherName + " !");
+                    mode3ReminderCard.setAlpha(0f);
+                    mode3ReminderCard.setVisibility(View.VISIBLE);
+                    mode3ReminderCard.animate().alpha(1f).setDuration(350).start();
+                    globalHandler.postDelayed(() ->
+                        mode3ReminderCard.animate().alpha(0f).setDuration(500)
+                            .withEndAction(() -> mode3ReminderCard.setVisibility(View.GONE)).start()
+                    , 4000);
+                }
                 // Survivor rolls and moves using the punisher's color/pieces
                 currentPlayerColor = currentPlayer.getColor();
                 currentPlayerPosition = currentPlayer.getPosition();
                 currentPlayerSelectedIndex = currentPlayer.getIndex();
-                currentPlayerName = survivorPlayer.name;
+                currentPlayerName = savedSurvivorName;
                 currentPlayer.setActive();
                 if (survivorPlayer.isBot) {
                     hintArrow.setVisibility(GONE);
