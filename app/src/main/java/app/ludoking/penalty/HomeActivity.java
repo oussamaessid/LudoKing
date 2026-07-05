@@ -8,12 +8,13 @@ import androidx.core.content.res.ResourcesCompat;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
-import android.animation.ObjectAnimator;
 import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.Bitmap;
+import android.graphics.Color;
 import android.graphics.PorterDuff;
 import android.graphics.drawable.AnimationDrawable;
 import android.graphics.drawable.Drawable;
@@ -29,7 +30,6 @@ import android.view.WindowInsets;
 import android.view.WindowInsetsController;
 import android.view.WindowManager;
 import android.view.animation.AnticipateInterpolator;
-import android.view.animation.LinearInterpolator;
 import android.view.animation.OvershootInterpolator;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
@@ -38,6 +38,8 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.engine.bitmap_recycle.BitmapPool;
+import com.bumptech.glide.load.resource.bitmap.BitmapTransformation;
 import com.bumptech.glide.load.resource.gif.GifDrawable;
 import com.bumptech.glide.request.target.DrawableImageViewTarget;
 import com.bumptech.glide.request.transition.Transition;
@@ -45,11 +47,79 @@ import com.bumptech.glide.request.transition.Transition;
 import android.text.Editable;
 import android.text.TextWatcher;
 
+import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
+import java.util.ArrayDeque;
+import java.util.Deque;
 import java.util.Objects;
 
-import app.ludoking.penalty.R;
-
 public class HomeActivity extends AppCompatActivity implements View.OnClickListener {
+
+    private static class TransparentBackgroundTransformation extends BitmapTransformation {
+        private static final String ID = "app.ludoking.penalty.TransparentBackgroundTransformation";
+        private static final int WHITE_THRESHOLD = 235;
+
+        @Override
+        protected Bitmap transform(@NonNull BitmapPool pool, @NonNull Bitmap toTransform, int outWidth, int outHeight) {
+            Bitmap result = toTransform.copy(Bitmap.Config.ARGB_8888, true);
+            int width = result.getWidth();
+            int height = result.getHeight();
+            int[] pixels = new int[width * height];
+            result.getPixels(pixels, 0, width, 0, 0, width, height);
+
+            boolean[] visited = new boolean[pixels.length];
+            Deque<Integer> stack = new ArrayDeque<>();
+
+            for (int x = 0; x < width; x++) {
+                pushIfWhite(x, pixels, visited, stack);
+                pushIfWhite((height - 1) * width + x, pixels, visited, stack);
+            }
+            for (int y = 0; y < height; y++) {
+                pushIfWhite(y * width, pixels, visited, stack);
+                pushIfWhite(y * width + width - 1, pixels, visited, stack);
+            }
+
+            while (!stack.isEmpty()) {
+                int idx = stack.pop();
+                pixels[idx] = Color.TRANSPARENT;
+                int px = idx % width;
+                int py = idx / width;
+                if (px > 0) pushIfWhite(idx - 1, pixels, visited, stack);
+                if (px < width - 1) pushIfWhite(idx + 1, pixels, visited, stack);
+                if (py > 0) pushIfWhite(idx - width, pixels, visited, stack);
+                if (py < height - 1) pushIfWhite(idx + width, pixels, visited, stack);
+            }
+
+            result.setPixels(pixels, 0, width, 0, 0, width, height);
+            return result;
+        }
+
+        private void pushIfWhite(int idx, int[] pixels, boolean[] visited, Deque<Integer> stack) {
+            if (visited[idx]) return;
+            int color = pixels[idx];
+            if (Color.red(color) < WHITE_THRESHOLD || Color.green(color) < WHITE_THRESHOLD || Color.blue(color) < WHITE_THRESHOLD) {
+                return;
+            }
+            visited[idx] = true;
+            stack.push(idx);
+        }
+
+        @Override
+        public void updateDiskCacheKey(@NonNull MessageDigest messageDigest) {
+            messageDigest.update(ID.getBytes(StandardCharsets.UTF_8));
+        }
+
+        @Override
+        public boolean equals(Object obj) {
+            return obj instanceof TransparentBackgroundTransformation;
+        }
+
+        @Override
+        public int hashCode() {
+            return ID.hashCode();
+        }
+    }
+
     double dpHeight;
     double dpWidth;
     double pxWidth;
@@ -158,26 +228,44 @@ public class HomeActivity extends AppCompatActivity implements View.OnClickListe
         params.topToTop = R.id.topNavBar;
         params.endToEnd = R.id.topNavBar;
         coinAndDiamondBG.setLayoutParams(params);
-        params = new ConstraintLayout.LayoutParams((int)(pxWidth*0.32), (int)((pxWidth*0.32)+((pxWidth*0.32)*0.14)));
-        params.topMargin = (int)(pxWidth*0.05);
-        params.leftMargin = (int)(pxWidth*0.15);
-        params.topToBottom = R.id.imageView15;
-        params.startToStart = R.id.root;
-        playonline.setLayoutParams(params);
-        params = new ConstraintLayout.LayoutParams((int)(pxWidth*0.32), (int)((pxWidth*0.32)+((pxWidth*0.32)*0.14)));
-        params.topMargin = (int)(pxWidth*0.05);
-        params.rightMargin = (int)(pxWidth*0.15);
-        params.topToBottom = R.id.imageView15;
-        params.endToEnd = R.id.root;
-        playwithfriends.setLayoutParams(params);
-        params = new ConstraintLayout.LayoutParams((int)(pxWidth*0.32), (int)((pxWidth*0.32)+((pxWidth*0.32)*0.14)));
-        params.leftToLeft = playonline.getId();
-        params.topToBottom = playonline.getId();
-        computer.setLayoutParams(params);
-        params = new ConstraintLayout.LayoutParams((int)(pxWidth*0.32), (int)((pxWidth*0.32)+((pxWidth*0.32)*0.14)));
-        params.rightToRight = playwithfriends.getId();
-        params.topToBottom = playwithfriends.getId();
-        passnplay.setLayoutParams(params);
+        playonline.setVisibility(View.GONE);
+        playwithfriends.setVisibility(View.GONE);
+        settingsbtn.setVisibility(View.GONE);
+        int gifSize = (int)(pxWidth * 0.65);
+        int cardHeight = (int)(pxHeight * 0.155);
+        int groupGap = (int)(pxHeight * 0.04);
+        int groupHeight = gifSize + groupGap + cardHeight;
+        int availableHeight = (int)pxHeight - navHeight;
+        int groupTop = navHeight + (availableHeight - groupHeight) / 2;
+
+        ConstraintLayout.LayoutParams gifParams = new ConstraintLayout.LayoutParams(gifSize, gifSize);
+        gifParams.topToTop = R.id.root;
+        gifParams.startToStart = R.id.root;
+        gifParams.endToEnd = R.id.root;
+        gifParams.topMargin = groupTop;
+        findViewById(R.id.imageView15).setLayoutParams(gifParams);
+
+        int sideMargin = (int)(pxWidth * 0.075);
+        int cardGap = (int)(pxWidth * 0.04);
+        int cardWidth = (int)((pxWidth - 2 * sideMargin - cardGap) / 2);
+        int cardTopMargin = groupTop + gifSize + groupGap;
+
+        ConstraintLayout.LayoutParams cardParams = new ConstraintLayout.LayoutParams(cardWidth, cardHeight);
+        cardParams.topToTop = R.id.root;
+        cardParams.startToStart = R.id.root;
+        cardParams.endToStart = R.id.imageView5;
+        cardParams.topMargin = cardTopMargin;
+        cardParams.leftMargin = sideMargin;
+        computer.setLayoutParams(cardParams);
+
+        cardParams = new ConstraintLayout.LayoutParams(cardWidth, cardHeight);
+        cardParams.topToTop = R.id.root;
+        cardParams.startToEnd = R.id.imageView4;
+        cardParams.endToEnd = R.id.root;
+        cardParams.topMargin = cardTopMargin;
+        cardParams.leftMargin = cardGap;
+        cardParams.rightMargin = sideMargin;
+        passnplay.setLayoutParams(cardParams);
 
         if(isMusicOn) {
             m = MediaPlayer.create(this, R.raw.music);
@@ -193,10 +281,13 @@ public class HomeActivity extends AppCompatActivity implements View.OnClickListe
         clickSoundEffect = MediaPlayer.create(this,R.raw.click);
         clickSoundEffect.seekTo(0);
 
+
+
         ImageView imageView = findViewById(R.id.imageView15);
         Glide.with(this)
                 .asGif()
                 .load(R.raw.ludotopmainicon)
+                .transform(new TransparentBackgroundTransformation())
                 .into(new DrawableImageViewTarget(imageView) {
                     @Override
                     public void onResourceReady(@NonNull Drawable resource, @Nullable Transition<? super Drawable> transition) {
@@ -207,7 +298,6 @@ public class HomeActivity extends AppCompatActivity implements View.OnClickListe
                         }
                     }
                 }.getView());
-
 
         // player login logic
         //sharedPreferences = getSharedPreferences("LudoModUser",MODE_PRIVATE);
@@ -238,10 +328,12 @@ public class HomeActivity extends AppCompatActivity implements View.OnClickListe
         }
 
         ImageView ad1 = findViewById(R.id.imageView142);
-        AnimationDrawable animationDrawable = (AnimationDrawable) ad1.getDrawable();
-        ad1.setImageDrawable(animationDrawable);
-        animationDrawable.setOneShot(false); // Set to true if you want to run the animation only once
-        animationDrawable.start();
+        if (ad1.getDrawable() instanceof AnimationDrawable) {
+            AnimationDrawable animationDrawable = (AnimationDrawable) ad1.getDrawable();
+            ad1.setImageDrawable(animationDrawable);
+            animationDrawable.setOneShot(false);
+            animationDrawable.start();
+        }
 
 
 
@@ -516,7 +608,7 @@ public class HomeActivity extends AppCompatActivity implements View.OnClickListe
                 statisticslayout.setVisibility(View.VISIBLE);
             }
         });
-        findViewById(R.id.imageView22).setOnClickListener(noInternetOnClick);
+        findViewById(R.id.imageView22).setOnClickListener(view -> settingsbtn.performClick());
 
         //setting listeners for views of statistics view
 
