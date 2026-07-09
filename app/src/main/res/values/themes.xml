@@ -11,6 +11,13 @@
         <item name="colorOnSecondary">@color/black</item>
         <!-- Status bar color. -->
         <item name="android:statusBarColor" tools:targetApi="l">?attr/colorPrimaryVariant</item>
+        <!-- Dark window background avoids a white flash between activities and on app launch. -->
+        <item name="android:windowBackground">@color/app_window_bg</item>
+        <!-- Suppress Android 12+ default splash screen icon so the app opens straight into the UI. -->
+        <item name="android:windowSplashScreenBackground" tools:targetApi="31">@color/app_window_bg</item>
+        <item name="android:windowSplashScreenAnimatedIcon" tools:targetApi="31">@drawable/splash_icon_transparent</item>
+        <item name="android:windowSplashScreenIconBackgroundColor" tools:targetApi="31">@color/app_window_bg</item>
+        <item name="android:windowSplashScreenAnimationDuration" tools:targetApi="31">0</item>
         <!-- Customize your theme here. -->
     </style>
 

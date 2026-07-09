@@ -1780,16 +1780,6 @@
             app:layout_constraintTop_toBottomOf="@+id/choosecolornnamemainlayout"
             app:srcCompat="@drawable/gamemainplaybtn" />
 
-        <ImageView
-            android:id="@+id/playonetokenoutbutton"
-            android:layout_width="wrap_content"
-            android:layout_height="110dp"
-            android:layout_marginTop="-10dp"
-            app:layout_constraintEnd_toEndOf="@+id/passnplaymainplaybtn"
-            app:layout_constraintStart_toStartOf="@+id/passnplaymainplaybtn"
-            app:layout_constraintTop_toBottomOf="@+id/passnplaymainplaybtn"
-            app:srcCompat="@drawable/playonetokenoutbtn" />
-
     </androidx.constraintlayout.widget.ConstraintLayout>
 
     <androidx.constraintlayout.widget.ConstraintLayout
@@ -5178,6 +5168,48 @@
             </LinearLayout>
 
         </LinearLayout>
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <!-- Loading Overlay (shown on Home load and before entering the game) -->
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/loadingoverlay"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="#DD0A1525"
+        android:clickable="true"
+        android:elevation="30dp"
+        android:focusable="true"
+        android:visibility="visible"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <ProgressBar
+            android:id="@+id/loadingspinner"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:indeterminateTint="#77AAFF"
+            app:layout_constraintBottom_toTopOf="@id/loadingtext"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintVertical_chainStyle="packed" />
+
+        <TextView
+            android:id="@+id/loadingtext"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="14dp"
+            android:fontFamily="sans-serif-medium"
+            android:text="Loading..."
+            android:textColor="#FFFFFF"
+            android:textSize="13sp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/loadingspinner" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 

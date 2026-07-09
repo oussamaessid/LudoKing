@@ -10,4 +10,5 @@
     <color name="dim_color">#721E1E1E</color>
     <color name="dim_color_dark">#A61E1E1E</color>
     <color name="inactivetabcolor2p">#80000000</color>
+    <color name="app_window_bg">#0A1525</color>
 </resources>

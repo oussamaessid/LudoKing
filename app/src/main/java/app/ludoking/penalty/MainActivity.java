@@ -143,6 +143,8 @@ public class MainActivity extends AppCompatActivity {
 
     // ingameexitgamelayout
     ConstraintLayout quitgamelayout;
+    ConstraintLayout gameLoadingOverlay;
+    private static final int GAME_LOADING_TRANSITION_DELAY = 350;
     ImageView ingameyesbtn,ingamenobtn,ingamesoundbtn,ingamemusicbtn;
 
     // ingame rmp layout
@@ -2266,12 +2268,20 @@ public class MainActivity extends AppCompatActivity {
         ingameyesbtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                stopEverything();
-                Intent i = new Intent(MainActivity.this, HomeActivity.class);
-                i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-                startActivity(i);
-                overridePendingTransition(0,0);
-                finish();
+                ingameyesbtn.setEnabled(false);
+                showGameLoadingOverlay();
+                gameLoadingOverlay.postDelayed(() -> {
+                    stopEverything();
+                    Intent i = new Intent(MainActivity.this, HomeActivity.class);
+                    // Reuses the existing Home instance already beneath us in the back
+                    // stack instead of tearing down the task: avoids Android's opaque
+                    // "starting window" placeholder that would otherwise hide our own
+                    // loading overlay behind a blank frame during the switch.
+                    i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
+                    startActivity(i);
+                    overridePendingTransition(0,0);
+                    finish();
+                }, GAME_LOADING_TRANSITION_DELAY);
             }
         });
 
@@ -2594,6 +2604,8 @@ public class MainActivity extends AppCompatActivity {
         redHomeBlink.setLayoutParams(lp);
         lp.addRule(RelativeLayout.ALIGN_TOP,R.id.imageView); lp.addRule(RelativeLayout.ALIGN_LEFT,R.id.imageView);
 
+        // Board is fully built at this point, so it's safe to reveal it now.
+        hideGameLoadingOverlay();
     }
 
 
@@ -2606,6 +2618,22 @@ public class MainActivity extends AppCompatActivity {
             }
             try { congratulationSound.release(); } catch (Exception e) {}
         }
+    }
+
+    private void showGameLoadingOverlay() {
+        gameLoadingOverlay.setAlpha(0f);
+        gameLoadingOverlay.setVisibility(View.VISIBLE);
+        gameLoadingOverlay.animate().alpha(1f).setDuration(150).setListener(null).start();
+    }
+
+    private void hideGameLoadingOverlay() {
+        gameLoadingOverlay.animate().alpha(0f).setDuration(150).setListener(new AnimatorListenerAdapter() {
+            @Override
+            public void onAnimationEnd(Animator animation) {
+                super.onAnimationEnd(animation);
+                gameLoadingOverlay.setVisibility(View.GONE);
+            }
+        }).start();
     }
 
     @Override
@@ -3015,6 +3043,8 @@ public class MainActivity extends AppCompatActivity {
         ingamemenuitemslayout = findViewById(R.id.ingamemenuitemslayout);
         menuremoveplayersbtn = findViewById(R.id.rmpitemmenu);
         menuexitbtn = findViewById(R.id.exititemmenu);
+
+        gameLoadingOverlay = findViewById(R.id.gameloadingoverlay);
 
         // ingame exitlayout views
         quitgamelayout = findViewById(R.id.ingamequitlayout);

@@ -154,7 +154,7 @@ public class HomeActivity extends AppCompatActivity implements View.OnClickListe
     ImageView pnptokentype1,pnptokentype2,pnpqmark,pnpclassic,pnpteamup,pnpquick,pnpbackbtn,pnpnext;
     int pnpgametype=1;
     // pnp classic layout views
-    ImageView p2pbg,p3pbg,p4pbg,p5pbg,p6pbg,p5pbgtxt,p6pbgtxt,pnpclassicbackbtn,pnpclassicplaybtn,pnpclassicplay1tknout;
+    ImageView p2pbg,p3pbg,p4pbg,p5pbg,p6pbg,p5pbgtxt,p6pbgtxt,pnpclassicbackbtn,pnpclassicplaybtn;
     int currentplayermode=-1;
     TextView botsCountMonitor;
     // p2 layout views
@@ -206,6 +206,10 @@ public class HomeActivity extends AppCompatActivity implements View.OnClickListe
     TextView penaltyModePlayBtn, penaltyModeBackBtn;
     int selectedPenaltyMode = 1;
     Intent pendingGameIntent;
+
+    // loading overlay
+    ConstraintLayout loadingOverlay;
+    private static final int LOADING_TRANSITION_DELAY = 350;
 
     @SuppressLint({"MissingInflatedId", "ClickableViewAccessibility"})
     @Override
@@ -852,13 +856,11 @@ public class HomeActivity extends AppCompatActivity implements View.OnClickListe
                         p6pbg.setVisibility(View.GONE);
                         p5pbgtxt.setVisibility(View.GONE);
                         p6pbgtxt.setVisibility(View.GONE);
-                        pnpclassicplay1tknout.setVisibility(View.GONE);
                     } else {
                         p5pbg.setVisibility(View.VISIBLE);
                         p6pbg.setVisibility(View.VISIBLE);
                         p5pbgtxt.setVisibility(View.VISIBLE);
                         p6pbgtxt.setVisibility(View.VISIBLE);
-                        pnpclassicplay1tknout.setVisibility(View.VISIBLE);
                     }
 
                     if (tokenNormal) {
@@ -1096,9 +1098,6 @@ public class HomeActivity extends AppCompatActivity implements View.OnClickListe
                 }
             }
         });
-
-        pnpclassicplay1tknout.setOnTouchListener(clickEffect);
-        pnpclassicplay1tknout.setOnClickListener(noInternetOnClick);
 
         p2pbg.setOnTouchListener(clickEffect);
         p3pbg.setOnTouchListener(clickEffect);
@@ -1950,6 +1949,9 @@ public class HomeActivity extends AppCompatActivity implements View.OnClickListe
         });
 
         initPenaltyModeLayout();
+
+        // Home screen is fully built at this point, so it's safe to reveal it now.
+        hideLoadingOverlay();
     }
 
     private void showPenaltyModeScreen(Intent intent) {
@@ -1983,6 +1985,7 @@ public class HomeActivity extends AppCompatActivity implements View.OnClickListe
         penaltyMode3SelectedTag = findViewById(R.id.mode3selectedtag);
         penaltyModePlayBtn = findViewById(R.id.penaltymodeplaybtn);
         penaltyModeBackBtn = findViewById(R.id.penaltymodebackbtn);
+        loadingOverlay = findViewById(R.id.loadingoverlay);
 
         penaltyMode1Card.setOnClickListener(v -> {
             selectedPenaltyMode = 1;
@@ -2004,13 +2007,36 @@ public class HomeActivity extends AppCompatActivity implements View.OnClickListe
 
         penaltyModePlayBtn.setOnClickListener(v -> {
             if (pendingGameIntent != null) {
-                pendingGameIntent.putExtra("penaltyMode", selectedPenaltyMode);
-                startActivity(pendingGameIntent);
-                overridePendingTransition(0, 0);
-                penaltyModeLayout.setVisibility(View.GONE);
+                final Intent gameIntent = pendingGameIntent;
+                gameIntent.putExtra("penaltyMode", selectedPenaltyMode);
                 pendingGameIntent = null;
+                penaltyModePlayBtn.setEnabled(false);
+                showLoadingOverlay();
+                loadingOverlay.postDelayed(() -> {
+                    startActivity(gameIntent);
+                    overridePendingTransition(0, 0);
+                    penaltyModeLayout.setVisibility(View.GONE);
+                    hideLoadingOverlay();
+                    penaltyModePlayBtn.setEnabled(true);
+                }, LOADING_TRANSITION_DELAY);
             }
         });
+    }
+
+    private void showLoadingOverlay() {
+        loadingOverlay.setAlpha(0f);
+        loadingOverlay.setVisibility(View.VISIBLE);
+        loadingOverlay.animate().alpha(1f).setDuration(150).setListener(null).start();
+    }
+
+    private void hideLoadingOverlay() {
+        loadingOverlay.animate().alpha(0f).setDuration(150).setListener(new AnimatorListenerAdapter() {
+            @Override
+            public void onAnimationEnd(Animator animation) {
+                super.onAnimationEnd(animation);
+                loadingOverlay.setVisibility(View.GONE);
+            }
+        }).start();
     }
 
     private int getThisPlayerNameIndex(String leftOverColour, String colour) {
@@ -2297,7 +2323,6 @@ public class HomeActivity extends AppCompatActivity implements View.OnClickListe
         p6pbgtxt = findViewById(R.id.p6ptxt);
         pnpclassicbackbtn = findViewById(R.id.choosecolornnamebackbtn);
         pnpclassicplaybtn = findViewById(R.id.passnplaymainplaybtn);
-        pnpclassicplay1tknout = findViewById(R.id.playonetokenoutbutton);
 
         // p2,p3,p4 layout inside passnplay classic
         p2layout = findViewById(R.id.classicp2layout);
