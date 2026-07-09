@@ -207,7 +207,6 @@ public class HomeActivity extends AppCompatActivity implements View.OnClickListe
     int selectedPenaltyMode = 1;
     Intent pendingGameIntent;
 
-    // loading overlay
     ConstraintLayout loadingOverlay;
     private static final int LOADING_TRANSITION_DELAY = 350;
 
